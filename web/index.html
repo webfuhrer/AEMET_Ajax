@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+            function cargarOyente()
+            {
+                document.getElementById("municipio").onkeydown=hacerPeticionMunicipios;
+              //  document.geteElementById("municipio").onkeydown=function(){hacerPeticionMunicipios();};
+                
+            }
+            function hacerPeticionMunicipios()
+            {
+                var municipio=document.getElementById("municipio").value;
+                var url="MiServlet?texto="+municipio;
+                var peticion=new XMLHttpRequest();
+                peticion.onreadystatechange=function()
+                {
+                    if(this.readyState==4 && this.status==200)
+                    {
+                        tratarJSON(this.responseText);
+                    }
+                }
+                peticion.open("GET", url, true);
+            peticion.send();
+            }
+            
+            function tratarJSON(json)
+            {
+               // console.log(json);
+                var obj_json=JSON.parse(json);
+                 /*   {
+"municipios":[{"nombre":"Albacete", "id_muni":45, "id_prov":23},
+{"nombre":"Soria", "id_muni":78, "id_prov":16},...]
+}
+*/
+            var elemento_ul=document.getElementById("lista_municipios");
+            var elementos_lista=elemento_ul.getElementsByTagName("li");
+            if (elementos_lista.length>0)
+            {
+                elemento_ul.innerHTML="";
+             /*   console.log("metodo borrar hijos");
+                //Ya hay elementos li y me los tengo que cargar
+                for (i=0; i<elementos_lista.length; i++)
+                {console.log("bucle borrar hijos "+i);
+                    var elemento_li=elementos_lista[i];
+                    var padre_li=elemento_li.parentNode;
+                    padre_li.removeChild(elemento_li);
+                }*/
+            }
+            var lista_municipios=obj_json.municipios;
+            for (i=0; i<lista_municipios.length; i++)
+                {
+                       var nombre=lista_municipios[i].nombre;
+                       var id_municipio=lista_municipios[i].id_muni;
+                       var id_provincia=lista_municipios[i].id_prov;
+                       var codigo=crearCodigo(id_municipio, id_provincia);
+                       var obj_li=document.createElement("li");
+                       obj_li.innerHTML="<a href='http://www.aemet.es/xml/municipios/localidad_"+codigo+".xml' >"+nombre+"</a>";
+                       document.getElementById("lista_municipios").appendChild(obj_li);
+                }
+            }
+            function crearCodigo(id_muni, cod_prov)
+            {
+                if (cod_prov<10)
+                {
+                    cod_prov="0"+cod_prov;
+                }
+                id_muni=id_muni+"";
+                while(id_muni.length<3)
+                {
+                    id_muni="0"+id_muni;
+                }
+                var codigo=cod_prov+id_muni;
+                return codigo;
+                
+            }
+            </script>
+    </head>
+    <body onload="cargarOyente();">
+        <div>TODO write content</div>
+        <input type="text" id="municipio">
+        <ul id="lista_municipios">
+            
+        </ul>
+    </body>
+</html>
