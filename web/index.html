@@ -9,6 +9,11 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .clicable{
+                cursor: pointer;
+            }
+            </style>
         <script>
             function cargarOyente()
             {
@@ -63,9 +68,33 @@ and open the template in the editor.
                        var id_provincia=lista_municipios[i].id_prov;
                        var codigo=crearCodigo(id_municipio, id_provincia);
                        var obj_li=document.createElement("li");
-                       obj_li.innerHTML="<a href='http://www.aemet.es/xml/municipios/localidad_"+codigo+".xml' >"+nombre+"</a>";
+                       obj_li.innerHTML="<p class='clicable' onclick='pedirClima("+codigo+");'>"+nombre+"</p>";
                        document.getElementById("lista_municipios").appendChild(obj_li);
                 }
+            }
+            function pedirClima(codigo)
+            {
+                var url="http://www.aemet.es/xml/municipios/localidad_"+codigo+".xml";
+                var peticion=new XMLHttpRequest();
+                peticion.onreadystatechange=function()
+                {
+                    if(this.readyState==4 && this.status==200)
+                    {
+                        tratarXML(this.responseText);
+                    }
+                }
+                peticion.open("GET", url, true);
+            peticion.send();
+                
+            }
+            function tratarXML(xml)
+            {
+                var parser = new DOMParser();
+                var xmlDoc = parser.parseFromString(xml,"text/xml");
+                var nombre=xmlDoc.getElementsByTagName("nombre")[0].childNodes[0].nodeValue;
+                var provincia=xmlDoc.getElementsByTagName("provincia")[0].childNodes[0].nodeValue;
+                console.log(nombre+", "+provincia);
+                
             }
             function crearCodigo(id_muni, cod_prov)
             {
